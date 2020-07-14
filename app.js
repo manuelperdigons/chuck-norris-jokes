@@ -1,6 +1,5 @@
 const express = require('express');
 const jokesRoute = require('./routes/jokesRoute');
-
 const app = express();
 
 app.use('/', jokesRoute);

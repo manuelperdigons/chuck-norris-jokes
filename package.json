@@ -1,0 +1,19 @@
+{
+  "name": "chuck-norris-jokes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Manuel Perdigon Socas",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "dotenv": "^8.2.0",
+    "dropbox-v2-api": "^2.4.20",
+    "express": "^4.17.1",
+    "favicons": "^6.1.0"
+  }
+}

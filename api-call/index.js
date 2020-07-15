@@ -10,7 +10,7 @@ const jokes = new Map();
 
 const getJokes = async () => {
   jokes.clear();
-  while (jokes.size < 10) {
+  while (jokes.size < 100) {
     const fullJoke = await chuckAPI.getJoke();
     const { id, value } = fullJoke.data;
     if (!jokes.has(id)) {

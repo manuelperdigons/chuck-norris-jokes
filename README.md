@@ -10,6 +10,7 @@ Application that fetches 100 unique jokes Chuck Norris API (<https://api.chuckno
 	3. Go to settings in the app in Dropbox account, generate an access token.
 
 * Save that generated access token in a config.env file in the project main folder as DROPBOX_TOKEN variable.
+* Open a terminal, navigate to the project root folder and run `npm install` to install all dependencies of project.
 * Open a terminal, navigate to the project root folder and run `npm run start`
 * Make GET request of endpoint that fetches jokes from Chuck Norris API (<http://localhost:3000/jokes>) to request API jokes (It will fetch jokes and storage them in a map and then in CSV file in fs, finally it connects your code with your Dropbox account using your access token to save the CSV file with 100 Chuck Norris jokes in your Dropbox Account).
 

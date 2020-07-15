@@ -3,6 +3,6 @@ const apiController = require('../api-call/index');
 
 const router = express.Router();
 
-router.get('/', apiController.getJokes);
+router.get('/', apiController.response);
 
 module.exports = router;

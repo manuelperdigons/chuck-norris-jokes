@@ -1,33 +1,37 @@
 const fs = require('fs');
 const dropboxV2Api = require('dropbox-v2-api');
-const getJoke = require("./api-call");
-const favicons = require("favicons");
+const chuckAPI = require('./chuck-api');
 
 const dropbox = dropboxV2Api.authenticate({
   token: process.env.DROPBOX_TOKEN
 });
 
-exports.getJokes = async (req, res, next) => {
-  const jokes = new Map();
+const jokes = new Map();
 
-  while (jokes.size < 10) {
-    const fullJoke = await getJoke.chuckNorrisJokes();
+const getJokes = async () => {
+  while (jokes.size < 100) {
+    const fullJoke = await chuckAPI.getJoke();
     const { id, value } = fullJoke.data;
     if (!jokes.has(id)) {
       jokes.set(id, value);
     }
   }
-  const headers = 'ID, JOKE';
-  const jokeCSV = Array.from(
-      jokes.entries()
-    ).map(entry => {
-      return `${JSON.stringify(entry[0])},${JSON.stringify(entry[1])}`;
-    }).join('\r\n');
+};
 
-  const csv = `${headers}\r\n${jokeCSV}`;
-
-  fs.writeFileSync('./chuck-norris-jokes.csv', csv, 'utf8');
-
+const createCSV = () => {
+    const headers = 'ID, JOKE';
+    const jokeCSV = Array.from(
+        jokes.entries()
+      ).map(entry => {
+        return `${JSON.stringify(entry[0])},${JSON.stringify(entry[1])}`;
+      }).join('\r\n');
+  
+    const csv = `${headers}\r\n${jokeCSV}`;
+  
+    fs.writeFileSync('./chuck-norris-jokes.csv', csv, 'utf8');
+  }
+  
+const uploadCSV = () => {
   dropbox({
     resource: 'files/upload',
     parameters: {
@@ -40,9 +44,22 @@ exports.getJokes = async (req, res, next) => {
     console.log(result);
     console.log(response);
   });
+}
 
-  res.status(200).json({
-    status: "success",
-    data: JSON.stringify(Array.from(jokes.entries()))
-  });
-};
+exports.response = async (req, res, next) => {
+  await getJokes();
+  if (jokes.size != 0) {
+      createCSV();
+      uploadCSV();
+      res.status(200).json({
+        status: "success",
+        data: JSON.stringify(Array.from(jokes.entries()))
+      }); 
+  } else {
+    res.status(400).json({
+      status: 'failed',
+      message: 'An error has occured, unable to get Chuck Norris jokes, please try again'
+    })
+  }
+}
+

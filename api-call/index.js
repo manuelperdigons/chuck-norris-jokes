@@ -9,7 +9,8 @@ const dropbox = dropboxV2Api.authenticate({
 const jokes = new Map();
 
 const getJokes = async () => {
-  while (jokes.size < 100) {
+  jokes.clear();
+  while (jokes.size < 10) {
     const fullJoke = await chuckAPI.getJoke();
     const { id, value } = fullJoke.data;
     if (!jokes.has(id)) {
@@ -31,8 +32,8 @@ const createCSV = () => {
     fs.writeFileSync('./chuck-norris-jokes.csv', csv, 'utf8');
   }
   
-const uploadCSV = () => {
-  dropbox({
+const uploadCSV = async () => {
+  await dropbox({
     resource: 'files/upload',
     parameters: {
         path: '/dropbox/chuck-norris-jokes.csv',
@@ -50,7 +51,7 @@ exports.response = async (req, res, next) => {
   await getJokes();
   if (jokes.size != 0) {
       createCSV();
-      uploadCSV();
+      await uploadCSV();
       res.status(200).json({
         status: "success",
         data: JSON.stringify(Array.from(jokes.entries()))

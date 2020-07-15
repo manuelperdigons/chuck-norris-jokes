@@ -2,7 +2,7 @@ const express = require('express');
 const jokesRoute = require('./routes/jokesRoute');
 const app = express();
 
-app.use('/', jokesRoute);
+app.use('/jokes', jokesRoute);
 
 app.all('*', (req, res, next) => {
     next(new Error(`Unable to find ${req.originalUrl}`, 404));

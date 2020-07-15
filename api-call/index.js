@@ -6,10 +6,10 @@ const dropbox = dropboxV2Api.authenticate({
   token: process.env.DROPBOX_TOKEN
 });
 
-const jokes = new Map();
+const PATH = './chuck-norris-jokes.csv';
 
 const getJokes = async () => {
-  jokes.clear();
+  const jokes = new Map();
   while (jokes.size < 100) {
     const fullJoke = await chuckAPI.getJoke();
     const { id, value } = fullJoke.data;
@@ -17,9 +17,10 @@ const getJokes = async () => {
       jokes.set(id, value);
     }
   }
+  return jokes;
 };
 
-const createCSV = () => {
+const createCSV = (jokes, path) => {
     const headers = 'ID, JOKE';
     const jokeCSV = Array.from(
         jokes.entries()
@@ -28,35 +29,37 @@ const createCSV = () => {
       }).join('\r\n');
   
     const csv = `${headers}\r\n${jokeCSV}`;
-  
-    fs.writeFileSync('./chuck-norris-jokes.csv', csv, 'utf8');
+    fs.writeFileSync(path, csv, 'utf8');
   }
   
-const uploadCSV = async () => {
+const uploadCSV = async (path) => {
   await dropbox({
     resource: 'files/upload',
     parameters: {
         path: '/dropbox/chuck-norris-jokes.csv',
         mode: 'overwrite'
     },
-    readStream: fs.createReadStream('./chuck-norris-jokes.csv')
+    readStream: fs.createReadStream(path)
   }, (err, result, response) => {
-    console.log(err);
+    if(err){
+      console.log(err);
+      throw err
+    }
     console.log(result);
     console.log(response);
   });
 }
 
 exports.response = async (req, res, next) => {
-  await getJokes();
-  if (jokes.size != 0) {
-      createCSV();
-      await uploadCSV();
-      res.status(200).json({
-        status: "success",
-        data: JSON.stringify(Array.from(jokes.entries()))
-      }); 
-  } else {
+  try {
+    const jokes = await getJokes();
+    createCSV(jokes, PATH);
+    await uploadCSV(PATH);
+    res.status(200).json({
+      status: "success",
+      data: JSON.stringify(Array.from(jokes.entries()))
+    }); 
+  } catch (error) {
     res.status(400).json({
       status: 'failed',
       message: 'An error has occured, unable to get Chuck Norris jokes, please try again'
